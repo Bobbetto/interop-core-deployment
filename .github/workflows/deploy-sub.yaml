@@ -1,4 +1,4 @@
-name: Deploy - Solo Chart
+name: Deploy - Sub - TEST CACHE
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: string
         default: 'qa'
       timeout_seconds:
-        description: 'Timeout in seconds'
+        description: 'Kubectl apply wait timeout in seconds for Deployments'
         required: true
         type: number
         default: 120
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          repository: roberto-mondello-dgt/cache-helm-test
+          repository: roberto-mondello-dgt/interop-core-deployment
 
 
       - name: Calculate Chart.yaml hash
