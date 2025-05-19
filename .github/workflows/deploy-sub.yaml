@@ -57,7 +57,7 @@ jobs:
           CHART_VERSION="15.14.0"
 
           helm pull bitnami/$CHART_NAME --version $CHART_VERSION --untar
-          helm package $CHART_NAME -d ../charts
+          helm package $CHART_NAME -d ./charts
 
           echo "::info::Helm chart packaged and stored in ./charts."
 
