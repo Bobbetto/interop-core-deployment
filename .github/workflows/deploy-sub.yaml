@@ -65,5 +65,5 @@ jobs:
         if: steps.cache-restore.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
-          path: charts
+          path: ./charts
           key: cache-${{ inputs.environment }}-chart-${{ steps.check-chart.outputs.chart_hash }}
