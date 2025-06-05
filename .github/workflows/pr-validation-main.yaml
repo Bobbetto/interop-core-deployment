@@ -40,7 +40,7 @@ jobs:
         environment: [dev, qa, vapt]
     steps:
       - uses: actions/checkout@v4
-      - name: Esegui validation
+      - name: Executing validation
         uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
         with:
           environment: ${{ matrix.environment }}
