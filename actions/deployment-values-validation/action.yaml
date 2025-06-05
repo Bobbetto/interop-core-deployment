@@ -1,10 +1,12 @@
 name: 'Interop Core Deployment Validation'
-description: 'Validates charts, microservices and cronjobs'
+description: 'Validates charts, microservices, and cronjobs'
 inputs:
   environment:
     description: 'Environment to validate'
     required: true
-
+  infra_commons_tag:
+    description: 'infra-commons tag'
+    required: true
 
 runs:
   using: 'composite'
