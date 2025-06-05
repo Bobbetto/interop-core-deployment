@@ -4,9 +4,6 @@ inputs:
   environment:
     description: 'Environment to validate'
     required: true
-  infra_commons_tag:
-    description: 'infra-commons tag'
-    required: true
 
 runs:
   using: 'composite'
@@ -21,7 +18,7 @@ runs:
         path: interop-infra-commons
         fetch-depth: 0
         sparse-checkout: 'scripts/helm'
-        ref: ${{ inputs.infra_commons_tag }}
+        ref: main   # <--- usa qui il branch/tag che vuoi, es. "main" o "v1"
 
     - name: Helm Chart Linting Microservice
       run: |
