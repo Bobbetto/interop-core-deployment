@@ -1,11 +1,11 @@
 name: 'Interop Core Deployment Validation'
-description: 'Performs validation of chart, microservices, and cronjobs'
+description: 'Validates charts, microservices, and cronjobs'
 inputs:
   environment:
     description: 'Environment to validate'
     required: true
   infra_commons_tag:
-    description: 'Tag of the interop-infra-commons repo'
+    description: 'infra-commons tag'
     required: true
 
 runs:
@@ -48,7 +48,7 @@ runs:
       run: |
         TARGET_ENVIRONMENT="${{ inputs.environment }}"
         MICROSERVICES=$(find microservices -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "microservices=$MICROSERVICES" >> $GITHUB_ENV
+        echo "MICROSERVICES=$MICROSERVICES" >> $GITHUB_ENV
 
     - name: Microservices Template & Lint
       run: |
@@ -67,7 +67,7 @@ runs:
       run: |
         TARGET_ENVIRONMENT="${{ inputs.environment }}"
         CRONJOBS=$(find jobs -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "cronjobs=$CRONJOBS" >> $GITHUB_ENV
+        echo "CRONJOBS=$CRONJOBS" >> $GITHUB_ENV
 
     - name: Cronjobs Template & Lint
       run: |
