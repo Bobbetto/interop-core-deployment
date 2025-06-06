@@ -14,8 +14,8 @@ jobs:
       matrix:
         environment: [dev, qa, vapt]
     steps:
-      - name: EExecuting validation
-        uses: roberto-mondello-dgt/interop-core-deployment/actions/deployment-values-validation@main
+      - name: Executing validation
+        uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
         with:
           environment: ${{ matrix.environment }}
           infra_commons_tag: main 
