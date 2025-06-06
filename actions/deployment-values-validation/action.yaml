@@ -5,6 +5,9 @@ inputs:
   environment:
     description: 'Environment to run tests against'
     required: true
+  infra_commons_tag:
+    description: 'Tag for interop-infra-commons repository'
+    required: true
 
 runs:
   using: 'composite'
@@ -16,7 +19,7 @@ runs:
         path: interop-infra-commons 
         fetch-depth: 0
         sparse-checkout: 'scripts/helm'
-        ref: ${{ vars.INFRA_COMMONS_TAG }}
+        ref: ${{ inputs.infra_commons_tag }}
     
     - name: Helm Chart Linting - Microservice
       shell: bash
@@ -29,11 +32,7 @@ runs:
         OPTIONS=" --microservices "
         export PROJECT_DIR=$(pwd)
 
-        $SCRIPTS_FOLDER/helmLint-main.sh \
-        --debug \
-        --environment ${{ inputs.environment }} \
-        --output console $OPTIONS \
-        -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
+        $SCRIPTS_FOLDER/helmLint-main.sh --debug --environment ${{ inputs.environment }} --output console $OPTIONS -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
     
     - name: Helm Chart Linting - Cronjob
       shell: bash
@@ -46,10 +45,7 @@ runs:
         OPTIONS=" --jobs "
         export PROJECT_DIR=$(pwd)
 
-        $SCRIPTS_FOLDER/helmLint-main.sh --debug \
-        --environment ${{ inputs.environment }} \
-        --output console $OPTIONS \
-        -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
+        $SCRIPTS_FOLDER/helmLint-main.sh --debug --environment ${{ inputs.environment }} --output console $OPTIONS -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
 
     - name: Kube-linter download
       shell: bash
@@ -63,24 +59,17 @@ runs:
 
         kube-linter --version
 
-    - name: Get Microservices List
-      id: get_microservices
+    - name: Get Microservices List and Template & Lint
       shell: bash
       env:
         TARGET_ENVIRONMENT: ${{ inputs.environment }}
-      run: |
-        MICROSERVICES=$(find microservices -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "microservices=$MICROSERVICES" >> $GITHUB_OUTPUT
-
-    - name: Microservices Template & Lint
-      shell: bash
-      env:
-        MICROSERVICES: ${{ steps.get_microservices.outputs.microservices }}
         SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
         
         export PROJECT_DIR=$(pwd)
+        
+        MICROSERVICES=$(find microservices -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
         
         if [[ -n "$MICROSERVICES" ]]; then
           for MICROSERVICE_NAME in $MICROSERVICES; do
@@ -103,24 +92,17 @@ runs:
           echo "No microservices found for environment ${{ inputs.environment }}"
         fi
 
-    - name: Get Cronjobs List
-      id: get_cronjobs
+    - name: Get Cronjobs List and Template & Lint
       shell: bash
       env:
         TARGET_ENVIRONMENT: ${{ inputs.environment }}
-      run: |
-        CRONJOBS=$(find jobs -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "cronjobs=$CRONJOBS" >> $GITHUB_OUTPUT
-
-    - name: Cronjobs Template & Lint
-      shell: bash
-      env:
-        CRONJOBS: ${{ steps.get_cronjobs.outputs.cronjobs }}
         SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
         
         export PROJECT_DIR=$(pwd)
+        
+        CRONJOBS=$(find jobs -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
         
         if [[ -n "$CRONJOBS" ]]; then
           for CRONJOB_NAME in $CRONJOBS; do
