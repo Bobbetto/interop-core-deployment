@@ -1,80 +1,143 @@
+name: 'Validation Steps'
+description: 'Validates Helm charts for microservices and cronjobs'
+
+inputs:
+  environment:
+    description: 'Environment to run tests against'
+    required: true
+
 runs:
   using: 'composite'
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Checkout scripts repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
       with:
         repository: pagopa/interop-infra-commons
-        path: interop-infra-commons
+        path: interop-infra-commons 
         fetch-depth: 0
         sparse-checkout: 'scripts/helm'
-        ref: main # oppure v1, scegli tu
-
-    - name: Helm Chart Linting Microservice
+        ref: ${{ vars.INFRA_COMMONS_TAG }}
+    
+    - name: Helm Chart Linting - Microservice
+      shell: bash
+      env: 
+        CHART_TYPE: microservice
+        SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
-        export PROJECT_DIR=$(pwd)
-        ./interop-infra-commons/scripts/helm/helmLint-main.sh --debug --environment ${{ inputs.environment }} --output console --microservices -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
-      shell: bash
 
-    - name: Helm Chart Linting Cronjob
+        OPTIONS=" --microservices "
+        export PROJECT_DIR=$(pwd)
+
+        $SCRIPTS_FOLDER/helmLint-main.sh \
+        --debug \
+        --environment ${{ inputs.environment }} \
+        --output console $OPTIONS \
+        -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
+    
+    - name: Helm Chart Linting - Cronjob
+      shell: bash
+      env: 
+        CHART_TYPE: cronjob
+        SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
+
+        OPTIONS=" --jobs "
         export PROJECT_DIR=$(pwd)
-        ./interop-infra-commons/scripts/helm/helmLint-main.sh --debug --environment ${{ inputs.environment }} --output console --jobs -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
-      shell: bash
+
+        $SCRIPTS_FOLDER/helmLint-main.sh --debug \
+        --environment ${{ inputs.environment }} \
+        --output console $OPTIONS \
+        -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml
 
     - name: Kube-linter download
+      shell: bash
       run: |
         set -euo pipefail
+
         curl -sSLO https://github.com/stackrox/kube-linter/releases/download/v0.7.1/kube-linter-linux_arm64.tar.gz
         tar -xzf kube-linter-linux_arm64.tar.gz
         chmod +x kube-linter-linux_arm64/kube-linter
         sudo mv kube-linter-linux_arm64/kube-linter /usr/local/bin/kube-linter
+
         kube-linter --version
-      shell: bash
 
     - name: Get Microservices List
-      run: |
-        TARGET_ENVIRONMENT="${{ inputs.environment }}"
-        MICROSERVICES=$(find microservices -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "MICROSERVICES=$MICROSERVICES" >> $GITHUB_ENV
+      id: get_microservices
       shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        MICROSERVICES=$(find microservices -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
+        echo "microservices=$MICROSERVICES" >> $GITHUB_OUTPUT
 
     - name: Microservices Template & Lint
+      shell: bash
+      env:
+        MICROSERVICES: ${{ steps.get_microservices.outputs.microservices }}
+        SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
+        
         export PROJECT_DIR=$(pwd)
+        
         if [[ -n "$MICROSERVICES" ]]; then
           for MICROSERVICE_NAME in $MICROSERVICES; do
-            ./interop-infra-commons/scripts/helm/helmTemplate-svc-single.sh --debug --environment ${{ inputs.environment }} --microservice $MICROSERVICE_NAME -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml --output /tmp/helm-template-${MICROSERVICE_NAME}.yaml
-            kube-linter lint /tmp/helm-template-${MICROSERVICE_NAME}.yaml
+
+          # Templating 
+          echo "Templating microservice: $MICROSERVICE_NAME"
+          $SCRIPTS_FOLDER/helmTemplate-svc-single.sh \
+            --debug \
+            --environment ${{ inputs.environment }} \
+            --microservice $MICROSERVICE_NAME \
+            -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml \
+            --output /tmp/helm-template-${MICROSERVICE_NAME}.yaml
+
+          # Linting 
+          echo "Linting microservice: $MICROSERVICE_NAME"
+          kube-linter lint /tmp/helm-template-${MICROSERVICE_NAME}.yaml
+            
           done
         else
           echo "No microservices found for environment ${{ inputs.environment }}"
         fi
-      shell: bash
 
     - name: Get Cronjobs List
-      run: |
-        TARGET_ENVIRONMENT="${{ inputs.environment }}"
-        CRONJOBS=$(find jobs -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
-        echo "CRONJOBS=$CRONJOBS" >> $GITHUB_ENV
+      id: get_cronjobs
       shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        CRONJOBS=$(find jobs -type f -path "*/$TARGET_ENVIRONMENT/values.yaml" -exec dirname {} \; | awk -F'/' '{print $2}' | tr '\n' ' ')
+        echo "cronjobs=$CRONJOBS" >> $GITHUB_OUTPUT
 
     - name: Cronjobs Template & Lint
+      shell: bash
+      env:
+        CRONJOBS: ${{ steps.get_cronjobs.outputs.cronjobs }}
+        SCRIPTS_FOLDER: "./interop-infra-commons/scripts/helm"
       run: |
         set -euo pipefail
+        
         export PROJECT_DIR=$(pwd)
+        
         if [[ -n "$CRONJOBS" ]]; then
           for CRONJOB_NAME in $CRONJOBS; do
-            ./interop-infra-commons/scripts/helm/helmTemplate-cron-single.sh --debug --environment ${{ inputs.environment }} --job $CRONJOB_NAME -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml --output /tmp/helm-template-cronjob-${CRONJOB_NAME}.yaml
+                
+            # Templating 
+            echo "Templating cronjob: $CRONJOB_NAME"
+            $SCRIPTS_FOLDER/helmTemplate-cron-single.sh \
+              --debug \
+              --environment ${{ inputs.environment }} \
+              --job $CRONJOB_NAME \
+              -i $PROJECT_DIR/commons/${{ inputs.environment }}/images.yaml \
+              --output /tmp/helm-template-cronjob-${CRONJOB_NAME}.yaml
+                
+            # Linting
+            echo "Linting cronjob: $CRONJOB_NAME"
             kube-linter lint /tmp/helm-template-cronjob-${CRONJOB_NAME}.yaml
           done
         else
           echo "No cronjobs found for environment ${{ inputs.environment }}"
         fi
-      shell: bash
