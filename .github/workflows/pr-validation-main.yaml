@@ -1,4 +1,26 @@
-name: PR Validation - Main Starter - reusable action
+# name: PR Validation - Main Starter - reusable action
+
+# on:
+#   workflow_dispatch:
+
+# permissions:
+#   id-token: write
+#   contents: read
+
+# jobs:
+#   validation:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         environment: [dev, qa, vapt]
+#     steps:
+#       - name: Executing validation
+#         uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
+#         with:
+#           environment: ${{ matrix.environment }}
+#           infra_commons_tag: main 
+
+name: PR Validation - Main Starter - reusable workflow 
 
 on:
   workflow_dispatch:
@@ -15,7 +37,6 @@ jobs:
         environment: [dev, qa, vapt]
     steps:
       - name: Executing validation
-        uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
+        uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation@main
         with:
           environment: ${{ matrix.environment }}
-          infra_commons_tag: main 
