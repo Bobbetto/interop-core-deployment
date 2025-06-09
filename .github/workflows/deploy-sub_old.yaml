@@ -1,4 +1,4 @@
-name: Deploy (sub)
+name: Deploy (sub) - old
 
 on: 
   workflow_call:
