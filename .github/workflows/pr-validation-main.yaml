@@ -30,6 +30,10 @@ permissions:
   contents: read
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Starting validation workflow"
   validation:
     strategy:
       matrix:
