@@ -36,7 +36,11 @@ jobs:
       matrix:
         environment: [dev, qa, vapt]
     steps:
+      - name: Calling reusable workflow
+        run: |
+          echo "Workflow started for environment: ${{ matrix.environment }}"
+        
       - name: Executing validation
-        uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation
+        uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation@main
         with:
           environment: ${{ matrix.environment }}
