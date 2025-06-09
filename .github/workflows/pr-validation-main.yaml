@@ -15,7 +15,8 @@ jobs:
         environment: [dev, qa, vapt]
     steps:
       - name: Executing validation
-        uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
+        #uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
+        uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation@main
         with:
           environment: ${{ matrix.environment }}
           infra_commons_tag: main 
