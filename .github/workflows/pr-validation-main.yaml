@@ -34,10 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Starting validation workflow"
+  
   validation:
+    needs: setup
     strategy:
       matrix:
         environment: [dev, qa, vapt]
-    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation@main
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation.yaml@main
     with:
       environment: ${{ matrix.environment }}
