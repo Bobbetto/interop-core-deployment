@@ -1,4 +1,4 @@
-name: PR Validation - Main Starter - reusable action
+name: PR Validation - Main Starter - reusable workflow
 
 on:
   workflow_dispatch:
@@ -15,7 +15,6 @@ jobs:
         environment: [dev, qa, vapt]
     steps:
       - name: Executing validation
-        uses: roberto-mondello-dgt/cache-helm-test/actions/deployment-values-validation@main
+        uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/validation-steps.yaml@main
         with:
           environment: ${{ matrix.environment }}
-          infra_commons_tag: main 
