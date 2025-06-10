@@ -40,6 +40,6 @@ jobs:
     strategy:
       matrix:
         environment: [dev, qa, vapt]
-    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/reusable-workflows/pr-deployment-values-validation.yaml@main
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/pr-deployment-values-validation.yaml@main
     with:
       environment: ${{ matrix.environment }}
