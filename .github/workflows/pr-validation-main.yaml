@@ -30,13 +30,14 @@ permissions:
   contents: read
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Starting validation workflow"
+  # setup:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: echo "Starting validation workflow"
   
   validation:
-    needs: setup
+    name: "Validation – ${{ matrix.environment }}"
+    #needs: setup
     strategy:
       fail-fast: false
       matrix:
