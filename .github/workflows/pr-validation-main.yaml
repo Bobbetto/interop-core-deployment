@@ -38,6 +38,7 @@ jobs:
   validation:
     needs: setup
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, qa, vapt]
     uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
