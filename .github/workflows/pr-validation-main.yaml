@@ -46,7 +46,7 @@ jobs:
   validation:
     name: "Validation – ${{ matrix.environment }}"
     needs: extract-ref
-    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@1.2.3
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@1.0.0
     strategy:
       fail-fast: false
       matrix:
