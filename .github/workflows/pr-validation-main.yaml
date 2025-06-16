@@ -1,4 +1,25 @@
-name: PR Validation - Main Starter - reusable workflow 
+# name: PR Validation - Main Starter
+
+# on:
+#   workflow_dispatch:
+
+# permissions:
+#   id-token: write
+#   contents: read
+
+# jobs:
+#   validation:
+#     name: "Validation – ${{ matrix.environment }}"
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         environment: [dev, qa, vapt]
+#     uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
+#     with:
+#       environment: ${{ matrix.environment }}
+
+
+name: PR Validation - Main Starter
 
 on:
   workflow_dispatch:
@@ -8,13 +29,34 @@ permissions:
   contents: read
 
 jobs:
+  extract-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      infra_commons_tag: ${{ steps.extract_tag.outputs.infra_commons_tag }}
+    steps:
+      - name: Estrai il ref/tag usato in questo workflow
+        id: extract_tag
+        run: |
+          FULL_REF="${GITHUB_REF}"
+
+          if [[ "$FULL_REF" == refs/tags/* ]]; then
+            TAG="${FULL_REF#refs/tags/}"
+          elif [[ "$FULL_REF" == refs/heads/* ]]; then
+            TAG="${FULL_REF#refs/heads/}"
+          else
+            TAG="main"
+          fi
+
+          echo "infra_commons_tag=$TAG" >> "$GITHUB_OUTPUT"
+
   validation:
     name: "Validation – ${{ matrix.environment }}"
-    #needs: setup
+    needs: extract-tag
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
     strategy:
       fail-fast: false
       matrix:
         environment: [dev, qa, vapt]
-    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
     with:
       environment: ${{ matrix.environment }}
+      infra_commons_tag: ${{ needs.extract-tag.outputs.infra_commons_tag }}
