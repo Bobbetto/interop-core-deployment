@@ -1,0 +1,69 @@
+name: PR Validation - Main Starter
+
+on:
+  workflow_dispatch:
+    inputs:
+      infra_commons_tag:
+        description: 'Tag of the infra-commons repository to use'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  print_inputs:
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Print Inputs
+      id: print_inputs
+      run: |
+        echo "- environment: \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- kind: \`${{ inputs.kind }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- target: \`${{ inputs.target }}\`" >> $GITHUB_STEP_SUMMARY
+
+  
+  extract-ref:
+    outputs:
+      infra_commons_tag: ${{ steps.extract_tag.outputs.infra_commons_tag }}
+    - name: Print GitHub workflow ref
+     run: |
+        echo "github.workflow_ref = $GITHUB_WORKFLOW_REF"
+        echo "github.head_ref     = $GITHUB_HEAD_REF" # trigger by workflow run is either pull_request or pull_request_target
+        echo "github.ref          = $GITHUB_REF"
+        echo "github.sha          = $GITHUB_SHA"
+        echo "github.event_path   = $GITHUB_EVENT_PATH"
+        echo "github.base_ref     = $GITHUB_BASE_REF" # trigger by workflow run is either pull_request or pull_request_target
+    - name: Extract and print ref/tag from current workflow
+      id: extract_tag
+      run: |
+        echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
+        REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2)
+        if [[ "$REF" == refs/tags/* ]]; then
+          TAG="${REF#refs/tags/}"
+        elif [[ "$REF" == refs/heads/* ]]; then
+          TAG="${REF#refs/heads/}"
+        else
+          TAG="main"
+        fi
+        echo "Extracted tag: $TAG"
+        echo "infra_commons_tag=$TAG" >> "$GITHUB_OUTPUT"
+        #echo "infra_commons_tag=${REF}" >> $GITHUB_OUTPUT
+        echo "Extracted ref: $REF"
+
+  validation:
+    name: "Validation – ${{ matrix.environment }}"
+    needs: extract-ref
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@1.0.0
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, qa, vapt]
+    with:
+      environment: ${{ matrix.environment }}
+      infra_commons_tag: ${{ needs.extract-ref.outputs.infra_commons_tag }}
