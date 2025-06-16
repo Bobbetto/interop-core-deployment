@@ -39,9 +39,20 @@ jobs:
         run: |
           
           echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
-          REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2 | cut -d'/' -f3)
-          echo "infra_commons_tag=${REF}" >> $GITHUB_OUTPUT
-          echo "Extracted ref/tag: $REF"
+          # REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2 | cut -d'/' -f3)
+          REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2)
+
+          if [[ "$REF" == refs/tags/* ]]; then
+            TAG="${REF#refs/tags/}"
+          elif [[ "$REF" == refs/heads/* ]]; then
+            TAG="${REF#refs/heads/}"
+          else
+            TAG="main"
+          fi
+          echo "Extracted tag: $TAG"
+          echo "infra_commons_tag=$TAG" >> "$GITHUB_OUTPUT"
+          #echo "infra_commons_tag=${REF}" >> $GITHUB_OUTPUT
+          echo "Extracted ref: $REF"
 
   validation:
     name: "Validation – ${{ matrix.environment }}"
