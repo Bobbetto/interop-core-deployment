@@ -32,14 +32,14 @@ jobs:
   extract-ref:
     runs-on: ubuntu-latest
     outputs:
-      ref_tag: ${{ steps.extract_tag.outputs.ref_tag }}
+      infra_commons_tag: ${{ steps.extract_tag.outputs.infra_commons_tag }}
     steps:
       - name: Extract ref/tag from current workflow
         id: extract_tag
         run: |
           echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
           REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2)
-          echo "ref_tag=${REF}" >> $GITHUB_OUTPUT
+          echo "infra_commons_tag=${REF}" >> $GITHUB_OUTPUT
           echo "Extracted ref/tag: $REF"
 
   validation:
@@ -52,4 +52,4 @@ jobs:
         environment: [dev, qa, vapt]
     with:
       environment: ${{ matrix.environment }}
-      ref_tag: ${{ needs.extract-ref.outputs.ref_tag }}
+      infra_commons_tag: ${{ needs.extract-ref.outputs.infra_commons_tag }}
