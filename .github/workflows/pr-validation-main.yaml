@@ -1,5 +1,5 @@
 name: Caller Workflow
-run-name: "${{ github.ref_name }} / ${{ inputs.environment }} - Caller"
+run-name: "${{ github.ref_name }} / Validation workflow - Caller"
 
 on: 
   workflow_dispatch:
@@ -17,12 +17,10 @@ permissions:
 jobs:
   print_inputs:
     runs-on: ubuntu-22.04
-    environment: ${{ inputs.environment }}
     steps:
       - name: Print Inputs
         id: print_inputs
         run: |
-          echo "- environment: \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -41,9 +39,14 @@ jobs:
         run: ls -la .github/workflows/
 
       - name: Extract tag from reusable workflow
-        id: resolve
+        id: extract-infra-commons-tag
         run: |
           echo "Extracting tag from reusable workflow (wf version ${{github.ref}})"
+
+          if [ ! -f .github/workflows/pr-validation-main.yaml ]; then
+            echo "File not found"
+            exit 1
+          fi
 
           fullref=$(yq e '.jobs.validation.uses' .github/workflows/pr-validation-main.yaml)
 
@@ -62,7 +65,7 @@ jobs:
           echo "infra_commons_tag=$final_tag" >> $GITHUB_OUTPUT
       
       - name: Show extracted tag
-        run: echo "infra_commons_tag = ${{ steps.resolve.outputs.infra_commons_tag }}"
+        run: echo "infra_commons_tag = ${{ steps.extract-infra-commons-tag.outputs.infra_commons_tag }}"
 
 
   validation:
@@ -75,4 +78,4 @@ jobs:
     uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
     with:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
-      environment: ${{ inputs.environment }}
+      environment: ${{ matrix.environment }}
