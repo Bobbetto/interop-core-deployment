@@ -39,7 +39,7 @@ jobs:
         run: |
           
           echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
-          REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2 | cut -d'/' -f2)
+          REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2 | cut -d'/' -f3)
           echo "infra_commons_tag=${REF}" >> $GITHUB_OUTPUT
           echo "Extracted ref/tag: $REF"
 
