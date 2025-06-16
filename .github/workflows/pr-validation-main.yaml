@@ -22,7 +22,7 @@ jobs:
         id: print_inputs
         run: |
           echo "- ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- User provided infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
 
   
   extract-infra-commons-tag:
