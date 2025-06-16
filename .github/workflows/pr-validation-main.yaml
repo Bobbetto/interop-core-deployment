@@ -29,29 +29,22 @@ permissions:
   contents: read
 
 jobs:
-  extract-tag:
+  extract-ref:
     runs-on: ubuntu-latest
     outputs:
-      infra_commons_tag: ${{ steps.extract_tag.outputs.infra_commons_tag }}
+      ref_tag: ${{ steps.extract_tag.outputs.ref_tag }}
     steps:
-      - name: Estrai il ref/tag usato in questo workflow
+      - name: Extract ref/tag from current workflow
         id: extract_tag
         run: |
-          FULL_REF="${GITHUB_REF}"
-
-          if [[ "$FULL_REF" == refs/tags/* ]]; then
-            TAG="${FULL_REF#refs/tags/}"
-          elif [[ "$FULL_REF" == refs/heads/* ]]; then
-            TAG="${FULL_REF#refs/heads/}"
-          else
-            TAG="main"
-          fi
-
-          echo "infra_commons_tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
+          REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2)
+          echo "ref_tag=${REF}" >> $GITHUB_OUTPUT
+          echo "Extracted ref/tag: $REF"
 
   validation:
     name: "Validation – ${{ matrix.environment }}"
-    needs: extract-tag
+    needs: extract-ref
     uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@main
     strategy:
       fail-fast: false
@@ -59,4 +52,4 @@ jobs:
         environment: [dev, qa, vapt]
     with:
       environment: ${{ matrix.environment }}
-      infra_commons_tag: ${{ needs.extract-tag.outputs.infra_commons_tag }}
+      ref_tag: ${{ needs.extract-ref.outputs.ref_tag }}
