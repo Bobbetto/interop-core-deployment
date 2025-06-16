@@ -10,8 +10,6 @@ on:
         type: string
         default: ''
 
-
-
 permissions:
   id-token: write
   contents: read
@@ -33,12 +31,15 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       resolved_infra_commons_tag: ${{ steps.extract-infra-commons-tag.outputs.infra_commons_tag }}
-    steps:
+    steps: 
       - name: Checkout caller repository
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
       
+      - name: Debug file existence
+        run: ls -la .github/workflows/
+
       - name: Extract tag from reusable workflow
         id: resolve
         run: |
