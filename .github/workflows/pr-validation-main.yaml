@@ -23,6 +23,9 @@ name: PR Validation - Main Starter
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*' 
 
 permissions:
   id-token: write
@@ -34,10 +37,14 @@ jobs:
     outputs:
       infra_commons_tag: ${{ steps.extract_tag.outputs.infra_commons_tag }}
     steps:
+      - name: Print GitHub workflow ref
+        run: |
+          echo "github.workflow_ref = $GITHUB_WORKFLOW_REF"
+          echo "github.ref         = $GITHUB_REF"
+          echo "github.sha         = $GITHUB_SHA"
       - name: Extract and print ref/tag from current workflow
         id: extract_tag
         run: |
-          echo "github-ref=${{ github.ref }}"
           echo "GITHUB_WORKFLOW_REF=${GITHUB_WORKFLOW_REF}"
           # REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2 | cut -d'/' -f3)
           REF=$(echo "$GITHUB_WORKFLOW_REF" | cut -d'@' -f2)
