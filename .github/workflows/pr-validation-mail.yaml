@@ -9,10 +9,7 @@ on:
         required: false
         type: string
         default: ''
-      environment:
-        description: 'Environment'
-        required: true
-        type: string
+
 
 
 permissions:
