@@ -75,10 +75,18 @@ jobs:
       matrix:
         environment: [dev, qa, vapt]
     secrets: inherit
-    #uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@v1.18.0
-    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/reusable-workflows/common-pr-deployment-values-validation.yaml@main
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@v1.18.0
     with:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
       environment: ${{ matrix.environment }}
 
 
+  validation_dev:
+    #runs-on: ubuntu-22.04
+    needs: [print_inputs, extract-infra-commons-tag]
+   
+    secrets: inherit
+    uses: roberto-mondello-dgt/cache-helm-test/.github/workflows/common-pr-deployment-values-validation.yaml@v1.18.0
+    with:
+      infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
+      environment: "dev"
