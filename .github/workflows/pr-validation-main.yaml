@@ -1,4 +1,4 @@
-name: Caller Workflow
+name: Main Workflow
 run-name: "${{ github.ref_name }} / Validation workflow - Caller"
 
 on: 
