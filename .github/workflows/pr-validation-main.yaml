@@ -2,6 +2,8 @@ name: Caller Workflow
 run-name: "${{ github.ref_name }} / Validation workflow - Caller"
 
 on: 
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
   workflow_dispatch:
     inputs:
       infra_commons_tag:
