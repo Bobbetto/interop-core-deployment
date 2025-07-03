@@ -2,8 +2,8 @@ name: Main Workflow - NEW
 run-name: "${{ github.ref_name }} / Validation workflow"
 
 on:
-  # pull_request:
-  #   types: [opened, edited, reopened, synchronize]
+  pull_request:
+     types: [opened, edited, reopened, synchronize]
   workflow_dispatch:
     inputs:
       infra_commons_tag:
