@@ -1,4 +1,4 @@
-name: Main Workflow - NEW !
+name: Main Workflow - NEW
 run-name: "${{ github.ref_name }} / Validation workflow"
 
 on:
