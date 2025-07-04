@@ -29,6 +29,8 @@ jobs:
         run: |
           echo "- ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- User provided infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- User provided strict_kube_linter_checks: \`${{ inputs.strict_kube_linter_checks }}\`" >> $GITHUB_STEP_SUMMARY
+
 
 
   extract-infra-commons-tag:
@@ -82,4 +84,4 @@ jobs:
     with:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
       environment: ${{ matrix.environment }}
-      strict_kube_linter_checks: ${{ inputs.strict_kube_linter_checks }}
+      strict_kube_linter_checks: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_kube_linter_checks || false }}
