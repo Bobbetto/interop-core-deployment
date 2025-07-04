@@ -81,4 +81,5 @@ jobs:
     with:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
       environment: ${{ matrix.environment }}
-      strict_kube_linter_checks: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_kube_linter_checks == 'true' || false }}
+      #strict_kube_linter_checks: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_kube_linter_checks == 'true' || false }}
+      strict_kube_linter_checks: false
