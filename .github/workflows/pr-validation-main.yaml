@@ -15,7 +15,6 @@ on:
         description: 'Enable strict kube linter checks'
         required: true
         type: boolean
-        default: false
 
 permissions:
   id-token: write
@@ -85,4 +84,4 @@ jobs:
     with:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
       environment: ${{ matrix.environment }}
-      strict_kube_linter_checks: ${{ inputs.strict_kube_linter_checks }}
+      strict_kube_linter_checks: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_kube_linter_checks || false }}
