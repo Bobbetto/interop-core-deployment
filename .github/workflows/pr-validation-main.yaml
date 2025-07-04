@@ -30,6 +30,7 @@ jobs:
         run: |
           echo "- ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- User provided infra_commons_tag: \`${{ inputs.infra_commons_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- User provided strict_kube_linter_checks: \`${{ inputs.strict_kube_linter_checks }}\`" >> $GITHUB_STEP_SUMMARY
 
   extract-infra-commons-tag:
     runs-on: ubuntu-22.04
