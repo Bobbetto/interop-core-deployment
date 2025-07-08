@@ -6,6 +6,17 @@ on:
      types: [opened, edited, reopened, synchronize]
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environment to validate against'
+        required: true
+        type: choice
+        options:
+          - att
+          - dev
+          - prod
+          - qa
+          - test
+          - vapt
       infra_commons_tag:
         description: 'Tag of the infra-commons repository to use'
         required: false
