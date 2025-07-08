@@ -83,6 +83,7 @@ jobs:
         run: echo "infra_commons_tag = ${{ steps.extract-infra-commons-tag.outputs.infra_commons_tag }}"
 
   validation:
+    if: github.event_name == 'pull_request'
     needs: [print_inputs, extract-infra-commons-tag]
     strategy:
       fail-fast: false
@@ -94,3 +95,13 @@ jobs:
       infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
       environment: ${{ matrix.environment }}
       strict_kube_linter_checks: false
+
+  validation_manual:
+    if: github.event_name == 'workflow_dispatch'
+    needs: [print_inputs, extract-infra-commons-tag]
+    secrets: inherit
+    uses: Bobbetto/interop-infra-commons/.github/workflows/common-pr-deployment-values-validation.yaml@main
+    with:
+      infra_commons_tag: ${{ needs.extract-infra-commons-tag.outputs.resolved_infra_commons_tag }}
+      environment: ${{ inputs.environment }}
+      strict_kube_linter_checks: ${{ inputs.strict_kube_linter_checks }}
